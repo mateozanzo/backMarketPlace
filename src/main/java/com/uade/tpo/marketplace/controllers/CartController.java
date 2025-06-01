@@ -37,10 +37,10 @@ public class CartController {
         return ResponseEntity.ok(cartDTO);
     }
 
-    @DeleteMapping("/remove")
-    public ResponseEntity<String> removeItemFromCart(@RequestBody CartItem cartItem, Authentication authentication) throws UserNotFoundException {
+    @DeleteMapping("/remove/{productId}")
+    public ResponseEntity<String> removeItemFromCart(@PathVariable Long productId, Authentication authentication) throws UserNotFoundException {
         String email = authentication.getName();
-        cartService.removeProductFromCart(email, cartItem);
+        cartService.removeProductFromCart(email, productId);
         return ResponseEntity.ok("Producto eliminado del carrito correctamente");
     }
 
@@ -51,9 +51,10 @@ public class CartController {
         return ResponseEntity.ok("Carrito vaciado correctamente");
     }
 
-    @PutMapping("/items")
+    @PutMapping("/update")
     public ResponseEntity<CartDTO> updateCartItemQuantity(@RequestBody CartItemRequestDTO request, Authentication authentication) {
         String email = authentication.getName();
+
         try {
             CartDTO updatedCart = cartService.updateCartItemQuantity(email, request);
             return ResponseEntity.ok(updatedCart);

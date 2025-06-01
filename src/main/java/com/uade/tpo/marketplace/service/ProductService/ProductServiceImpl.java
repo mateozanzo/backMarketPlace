@@ -58,6 +58,7 @@ public class ProductServiceImpl implements ProductService {
         Page<Product> productPage = productRepository.findAllWithStock(pageable);
 
         return productPage.map(product -> new ProductDTO(
+            product.getId(),
             product.getName(),
             product.getDescription(), 
             product.getPrice(), 
@@ -71,6 +72,7 @@ public class ProductServiceImpl implements ProductService {
     public List<ProductDTO> getProductByCategoryId(Long productId) {
         List<Product> productos =  productRepository.findByCategoryId(productId);
         return productos.stream().map(producto -> new ProductDTO(
+            producto.getId(),
             producto.getName(),
             producto.getDescription(),
             producto.getPrice(),

@@ -29,7 +29,7 @@ public class CartServiceImpl implements CartService {
     private UserRepository userRepository;
 
     @Override
-    public Cart removeProductFromCart(String email, CartItem cartItem) throws UserNotFoundException {
+    public Cart removeProductFromCart(String email, Long productId) throws UserNotFoundException {
         User user = userRepository.findByEmail(email).orElse(null);
         if (user == null) {
             throw new UserNotFoundException();
@@ -39,17 +39,15 @@ public class CartServiceImpl implements CartService {
             throw new RuntimeException("Carrito vacio");
         }
 
-        Product product = productRepository.findById(cartItem.getProduct().getId()).orElse(null);
-        if (product == null) {
-            throw new RuntimeException("Product not found");
-        }
+        Product product = productRepository.findById(productId)
+        .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        CartItem cartItemToRemove = cartItemRepository.findByCartAndProduct(cart, product);
-        if (cartItemToRemove != null) {
-            cartItemRepository.delete(cartItemToRemove);
-        } else {
-            throw new RuntimeException("Cart item not found");
+        CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, product);
+        
+        if (cartItem == null){
+            throw new RuntimeException("El producto no está en el carrito");
         }
+        cartItemRepository.delete(cartItem);
         return cart;
     }
 
@@ -79,7 +77,7 @@ public class CartServiceImpl implements CartService {
 
         List<CartItemDTO> itemsDTO = cart.getItems().stream().map(item -> {
             Product product = item.getProduct();
-            ProductCartDTO productCartDTO = new ProductCartDTO(product.getDescription(), product.getPrice());
+            ProductCartDTO productCartDTO = new ProductCartDTO(product.getId(),product.getDescription(), product.getPrice());
             return new CartItemDTO(productCartDTO, item.getQuantity());
         }).toList();
 
@@ -126,7 +124,7 @@ public class CartServiceImpl implements CartService {
 
         List<CartItemDTO> itemsDTO = cart.getItems().stream().map(item -> {
             Product productDTO = item.getProduct();
-            ProductCartDTO productCartDTO = new ProductCartDTO(productDTO.getDescription(), productDTO.getPrice());
+            ProductCartDTO productCartDTO = new ProductCartDTO(productDTO.getId(),productDTO.getDescription(), productDTO.getPrice());
             return new CartItemDTO(productCartDTO, item.getQuantity());
         }).toList();
 
@@ -165,7 +163,7 @@ public class CartServiceImpl implements CartService {
 
     List<CartItemDTO> itemsDTO = cart.getItems().stream().map(item -> {
         Product productDTO = item.getProduct();
-        ProductCartDTO productCartDTO = new ProductCartDTO(productDTO.getDescription(), productDTO.getPrice());
+        ProductCartDTO productCartDTO = new ProductCartDTO(productDTO.getId(),productDTO.getDescription(), productDTO.getPrice());
         return new CartItemDTO(productCartDTO, item.getQuantity());
     }).toList();
 
